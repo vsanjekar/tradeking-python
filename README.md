@@ -1,4 +1,8 @@
-tradeking-cli
+tradeking-python-api
 =============
 
-This is a CLI interface for TradeKing accounts. It can also be used for detailed stock quotes.
+This is a python API for TradeKing accounts.
+
+Other features include:
+- CLI interface for TradeKing account.
+- detailed stock quotes.
