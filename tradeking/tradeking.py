@@ -108,9 +108,15 @@ class TradeKing:
       print colored.yellow(symbol)
       print 'cost-basis:  ',costbasis,'base price:   ', base_price,'shares:',quantity
       print 'market-value:',marketvalue,'current price:',price
-      print 'gain/loss:   ',unrealized_gl
+      if (unrealized_gl >= 0):
+        print 'gain/loss:   ', colored.green(unrealized_gl)
+      else:
+        print 'gain/loss:   ', colored.red(unrealized_gl)
       unrealized_total_gl += unrealized_gl
-    print colored.yellow('Total unrealized gain/loss: '),colored.red(unrealized_total_gl)
+    if (unrealized_total_gl >= 0):
+      print colored.yellow('Total unrealized gain/loss: '), colored.green(unrealized_total_gl)
+    else:
+      print colored.yellow('Total unrealized gain/loss: '), colored.red(unrealized_total_gl)
     print '----------------------------------------------------------------'
     return
 
