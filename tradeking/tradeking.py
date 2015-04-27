@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
-import sys
-import oauth2
 from restkit import OAuthFilter, request
+import oauth2
+import oauth
+import urllib
 import json
 import types
 from clint.textui import colored
@@ -20,7 +21,7 @@ class TradeKing:
 
   def setup_urls(self):
     self.watchlist_url = "https://api.tradeking.com/v1/watchlists/DEFAULT.json"
-    self.watchlist_symbols_url = "https://api.tradeking.com/v1/watchlists/DEFAULT/symbols.json"
+    self.watchlist_symbols_url = "https://api.tradeking.com/v1/watchlist/DEFAULT/symbols.json"
     self.quote_url = 'https://api.tradeking.com/v1/market/ext/quotes.json?symbols='
     self.accounts_url = 'https://api.tradeking.com/v1/accounts.json'
     self.balance_url = 'https://api.tradeking.com/v1/accounts/'+str(self.user.acc_no)+'/balances.json'
@@ -38,21 +39,41 @@ class TradeKing:
     self.auth = OAuthFilter('*', consumer=myconsumer, token=mytoken, method=oauth2.SignatureMethod_HMAC_SHA1())
     return self.auth
 
+  def post_data(self):
+    values = {'symbols' : 'IBM'}
+    # data = urllib.urlencode(values)
+    # req = urllib2.Request(url, data)
+    # response = urllib2.urlopen(req)
+    # the_page = response.read()
+
+    # set up an OAuth Consumer
+    myconsumer = oauth.Consumer(key=self.user.consumer_key, secret=self.user.consumer_secret)
+    # manually update the access token/secret.
+    mytoken = oauth.Token(key=self.user.oauth_token, secret=self.user.oauth_token_secret)
+    client = oauth.Client(myconsumer, mytoken)
+    resp, content = client.request(
+                'https://api.tradeking.com/v1/watchlists.json',
+                method = "GET"
+                #force_auth_header=True
+                )
+    print resp, content
+    resp, content = client.request(
+                self.watchlist_symbols_url,
+                method = "POST",
+                body=urllib.urlencode(values),
+                headers={'Content-type': 'application/json'},
+                #force_auth_header=True
+                )
+    print resp, content
+    return
+
+
   def get_data(self, url):
     # auth = setup_oauth2()
     # get the response and return it
     queryresp = request(url, 'GET', filters=[self.auth])
     queryresult = json.loads(queryresp.body_string())
     return queryresult
-
-  def post_data(self, url):
-    url = watchlist_symbols_url
-    values = {'symbols' : 'IBM'}
-    data = urllib.urlencode(values)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    the_page = response.read()
-    return
 
   def get_acc_info(self):
     query_result = self.get_data(self.accounts_url)
@@ -152,12 +173,14 @@ class TradeKing:
 
   def get_acc_watchlist(self):
     query_result = self.get_data(self.watchlist_url)
-    # print json.dumps(query_result['response'], indent=2)
+    print json.dumps(query_result['response'], indent=2)
+
     watchlist = query_result['response']['watchlists']['watchlist']['watchlistitem']
     # print json.dumps(watchlist, indent=2)
     for watch in watchlist:
       symbol = watch['instrument']['sym']
-      self.get_ticker_brief(symbol)
+      print symbol
+      # self.get_ticker_brief(symbol)
 
   def get_ticker_quote(self, tickers):
     quote_url1 = self.quote_url+tickers

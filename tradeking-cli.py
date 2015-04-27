@@ -38,6 +38,7 @@ if options['portfolio']:
 # "./tradeking-cli.py.py -w"
 elif options['watchlist']:
   tk.get_acc_watchlist()
+  tk.post_data()
 # "./tradeking-cli.py.py -l"
 elif options['log']:
   tk.get_acc_history()
